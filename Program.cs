@@ -37,7 +37,7 @@ namespace Compiler
             Console.ReadKey();
         }
 
-        static void LexicalAnalize(ref StreamReader reader)
+        static void LexicalAnalysis(ref StreamReader reader)
         {
             for (UInt64 numberOfLine = 1; !reader.EndOfStream; numberOfLine++)
             {
