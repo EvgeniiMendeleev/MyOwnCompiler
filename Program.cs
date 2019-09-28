@@ -28,7 +28,7 @@ namespace Compiler
             StreamReader reader = new StreamReader(textOfCode);
             StreamWriter writer = new StreamWriter(File.Create("d:\\ResultOfCompiler.txt"));
 
-            LexicalAnalize(ref reader);
+            LexicalAnalsys(ref reader);
 
             writer.Close();
             reader.Close();
@@ -37,7 +37,7 @@ namespace Compiler
             Console.ReadKey();
         }
 
-        static void LexicalAnalize(ref StreamReader reader)
+        static void LexicalAnalsys(ref StreamReader reader)
         {
             for (UInt64 numberOfLine = 1; !reader.EndOfStream; numberOfLine++)
             {
