@@ -25,7 +25,7 @@ namespace LibraryForCompile
             {"<=", TypeOfLexeme.logical_operator},  {">=", TypeOfLexeme.logical_operator}, {">", TypeOfLexeme.logical_operator}, 
             {"~=", TypeOfLexeme.logical_operator}, {"=", TypeOfLexeme.logical_operator}, {"+", TypeOfLexeme.arithmetic_operator}, 
             {"-", TypeOfLexeme.arithmetic_operator}, {"/", TypeOfLexeme.arithmetic_operator}, {"*", TypeOfLexeme.arithmetic_operator}, 
-            {" ", TypeOfLexeme.separator}, {";", TypeOfLexeme.separator}
+            {" ", TypeOfLexeme.separator}, {";", TypeOfLexeme.separator},{",", TypeOfLexeme.separator}
         };
 
         public static ClassOfSymbol checkSymbol(char ch)
@@ -78,6 +78,7 @@ namespace LibraryForCompile
                 return TypeOfLexeme.constant_value;
             }
 
+
             TypeOfLexeme typeOfLexeme;
             bool resultOfSearch = tokens.TryGetValue(lexeme, out typeOfLexeme);
 
@@ -85,10 +86,23 @@ namespace LibraryForCompile
             {
                 return typeOfLexeme;
             }
-            else 
+
+            int countOfLogicalSigns = 0;
+
+            foreach (char ch in lexeme)
             {
-                return TypeOfLexeme.id;
+                if (Lexeme.checkSymbol(ch) == ClassOfSymbol.logical_sign)
+                {
+                    ++countOfLogicalSigns;
+                }
             }
+
+            if (countOfLogicalSigns == lexeme.Length)
+            {
+                return TypeOfLexeme.logical_operator;
+            }
+
+            return TypeOfLexeme.id;
         }
     }
 }
