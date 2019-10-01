@@ -15,6 +15,10 @@ namespace Compiler
             Console.Write("Введите путь к файлу для компиляции: ");
             string filePath = Console.ReadLine();
 
+            double res;
+            Double.TryParse("10e-15", out res);
+            Console.WriteLine(res);
+
             if (!File.Exists(filePath))
             {
                 Console.WriteLine("Указанного файла не существует!");
@@ -33,8 +37,21 @@ namespace Compiler
             writer.Close();
             reader.Close();
 
+
             Console.WriteLine("\nЛексический анализ завершён успешно!");
             Console.ReadKey();
+        }
+
+        static void ShowTypeOfLexeme(ref string word)
+        {
+            TypeOfLexeme type = Lexeme.isTypeOfLexeme(word);
+            Console.WriteLine(word + " имеет значение " + type);
+        }
+
+        static void showTypeOfLexeme(char ch)
+        {
+            TypeOfLexeme type = Lexeme.isTypeOfLexeme(Convert.ToString(ch));
+            Console.WriteLine(ch + " имеет значение " + type);
         }
 
         static void LexicalAnalsys(ref StreamReader reader)
@@ -44,7 +61,6 @@ namespace Compiler
                 string strFromCode = reader.ReadLine();
 
                 ClassOfSymbol symbolInWord = ClassOfSymbol.null_class;
-                TypeOfLexeme type;
 
                 string word = "";
 
@@ -55,9 +71,7 @@ namespace Compiler
                         case ClassOfSymbol.arithmetic_sign:
                             if (symbolInWord != ClassOfSymbol.arithmetic_sign && symbolInWord != ClassOfSymbol.separator)
                             {
-                                type = Lexeme.isTypeOfLexeme(word);
-
-                                Console.WriteLine(word + " имеет значение " + type);
+                                ShowTypeOfLexeme(ref word);
                                 word = "";
                             }
 
@@ -68,11 +82,19 @@ namespace Compiler
                         case ClassOfSymbol.letter:
                             if (word != "")
                             {
-                                if (symbolInWord == ClassOfSymbol.logical_sign)
+                                if (symbolInWord == ClassOfSymbol.logical_sign || (symbolInWord == ClassOfSymbol.numeral && Char.IsDigit(word[0])))
                                 {
-                                    type = Lexeme.isTypeOfLexeme(word);
-
-                                    Console.WriteLine(word + " имеет значение " + type);
+                                    ShowTypeOfLexeme(ref word);
+                                    word = "";
+                                }
+                                else if (symbolInWord == ClassOfSymbol.arithmetic_sign)
+                                {
+                                    ShowTypeOfLexeme(ref word);
+                                    word = "";
+                                }
+                                else if (symbolInWord == ClassOfSymbol.service_symbol)
+                                {
+                                    ShowTypeOfLexeme(ref word);
                                     word = "";
                                 }
                             }
@@ -89,8 +111,7 @@ namespace Compiler
                                     word += ch;
                                 }
 
-                                type = Lexeme.isTypeOfLexeme(word);
-                                Console.WriteLine(word + " имеет значение " + type);
+                                ShowTypeOfLexeme(ref word);
                                 word = "";
                             }
 
@@ -107,9 +128,12 @@ namespace Compiler
                             {
                                 if (symbolInWord == ClassOfSymbol.logical_sign || symbolInWord == ClassOfSymbol.arithmetic_sign)
                                 {
-                                    type = Lexeme.isTypeOfLexeme(word);
-
-                                    Console.WriteLine(word + " имеет значение " + type);
+                                    ShowTypeOfLexeme(ref word);
+                                    word = "";
+                                }
+                                else if (symbolInWord == ClassOfSymbol.service_symbol && word[word.Length - 1] != '.')
+                                {
+                                    ShowTypeOfLexeme(ref word);
                                     word = "";
                                 }
                             }
@@ -122,23 +146,18 @@ namespace Compiler
                             symbolInWord = ClassOfSymbol.separator;
                             if (word != "")
                             {
-                                type = Lexeme.isTypeOfLexeme(word);
-
-                                Console.WriteLine(word + " имеет значение " + type);
+                                ShowTypeOfLexeme(ref word);
                                 word = "";
 
                                 if (ch != ' ')
                                 {
-                                    type = Lexeme.isTypeOfLexeme(Convert.ToString(ch));
-                                    Console.WriteLine(ch + " имеет значение " + type);
+                                    showTypeOfLexeme(ch);
                                 }
                                 break;
                             }
                             if (ch != ' ')
                             {
-                                type = Lexeme.isTypeOfLexeme(word);
-
-                                Console.WriteLine(word + " имеет значение " + type);
+                                ShowTypeOfLexeme(ref word);
                                 word = "";
                                 break;
                             }
@@ -146,11 +165,9 @@ namespace Compiler
                             break;
 
                         case ClassOfSymbol.service_symbol:
-                            if (symbolInWord == ClassOfSymbol.letter)
+                            if (symbolInWord == ClassOfSymbol.letter || symbolInWord == ClassOfSymbol.numeral)
                             {
-                                type = Lexeme.isTypeOfLexeme(word);
-
-                                Console.WriteLine(word + " имеет значение " + type);
+                                ShowTypeOfLexeme(ref word);
                                 word = "";
                             }
                             symbolInWord = ClassOfSymbol.service_symbol;
@@ -169,9 +186,7 @@ namespace Compiler
 
                 if (word != "")
                 {
-                    type = Lexeme.isTypeOfLexeme(word);
-
-                    Console.WriteLine(word + " имеет значение " + type);
+                    ShowTypeOfLexeme(ref word);
                 }
             }
         }
