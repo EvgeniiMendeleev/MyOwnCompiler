@@ -15,10 +15,6 @@ namespace Compiler
             Console.Write("Введите путь к файлу для компиляции: ");
             string filePath = Console.ReadLine();
 
-            double res;
-            Double.TryParse("10e-15", out res);
-            Console.WriteLine(res);
-
             if (!File.Exists(filePath))
             {
                 Console.WriteLine("Указанного файла не существует!");
@@ -32,7 +28,7 @@ namespace Compiler
             StreamReader reader = new StreamReader(textOfCode);
             StreamWriter writer = new StreamWriter(File.Create("d:\\ResultOfCompiler.txt"));
 
-            LexicalAnalsys(ref reader);
+            LexicalAnalsys(ref reader, ref writer);
 
             writer.Close();
             reader.Close();
@@ -42,19 +38,21 @@ namespace Compiler
             Console.ReadKey();
         }
 
-        static void ShowTypeOfLexeme(ref string word)
+        static void ShowTypeOfLexeme(ref string word, ref StreamWriter writer)
         {
             TypeOfLexeme type = Lexeme.isTypeOfLexeme(word);
-            Console.WriteLine(word + " имеет значение " + type);
+            writer.WriteLine(word + " имеет значение " + type);
+            //Console.WriteLine(word + " имеет значение " + type);
         }
 
-        static void showTypeOfLexeme(char ch)
+        static void showTypeOfLexeme(char ch, ref StreamWriter writer)
         {
             TypeOfLexeme type = Lexeme.isTypeOfLexeme(Convert.ToString(ch));
-            Console.WriteLine(ch + " имеет значение " + type);
+            writer.WriteLine(ch + " имеет значение " + type);
+            //Console.WriteLine(ch + " имеет значение " + type);
         }
 
-        static void LexicalAnalsys(ref StreamReader reader)
+        static void LexicalAnalsys(ref StreamReader reader, ref StreamWriter writer)
         {
             for (UInt64 numberOfLine = 1; !reader.EndOfStream; numberOfLine++)
             {
@@ -71,7 +69,7 @@ namespace Compiler
                         case ClassOfSymbol.arithmetic_sign:
                             if (symbolInWord != ClassOfSymbol.arithmetic_sign && symbolInWord != ClassOfSymbol.separator)
                             {
-                                ShowTypeOfLexeme(ref word);
+                                ShowTypeOfLexeme(ref word, ref writer);
                                 word = "";
                             }
 
@@ -84,17 +82,17 @@ namespace Compiler
                             {
                                 if (symbolInWord == ClassOfSymbol.logical_sign || (symbolInWord == ClassOfSymbol.numeral && Char.IsDigit(word[0])))
                                 {
-                                    ShowTypeOfLexeme(ref word);
+                                    ShowTypeOfLexeme(ref word, ref writer);
                                     word = "";
                                 }
                                 else if (symbolInWord == ClassOfSymbol.arithmetic_sign)
                                 {
-                                    ShowTypeOfLexeme(ref word);
+                                    ShowTypeOfLexeme(ref word, ref writer);
                                     word = "";
                                 }
                                 else if (symbolInWord == ClassOfSymbol.service_symbol)
                                 {
-                                    ShowTypeOfLexeme(ref word);
+                                    ShowTypeOfLexeme(ref word, ref writer);
                                     word = "";
                                 }
                             }
@@ -111,7 +109,7 @@ namespace Compiler
                                     word += ch;
                                 }
 
-                                ShowTypeOfLexeme(ref word);
+                                ShowTypeOfLexeme(ref word, ref writer);
                                 word = "";
                             }
 
@@ -128,12 +126,12 @@ namespace Compiler
                             {
                                 if (symbolInWord == ClassOfSymbol.logical_sign || symbolInWord == ClassOfSymbol.arithmetic_sign)
                                 {
-                                    ShowTypeOfLexeme(ref word);
+                                    ShowTypeOfLexeme(ref word, ref writer);
                                     word = "";
                                 }
                                 else if (symbolInWord == ClassOfSymbol.service_symbol && word[word.Length - 1] != '.')
                                 {
-                                    ShowTypeOfLexeme(ref word);
+                                    ShowTypeOfLexeme(ref word, ref writer);
                                     word = "";
                                 }
                             }
@@ -146,18 +144,18 @@ namespace Compiler
                             symbolInWord = ClassOfSymbol.separator;
                             if (word != "")
                             {
-                                ShowTypeOfLexeme(ref word);
+                                ShowTypeOfLexeme(ref word, ref writer);
                                 word = "";
 
                                 if (ch != ' ')
                                 {
-                                    showTypeOfLexeme(ch);
+                                    showTypeOfLexeme(ch, ref writer);
                                 }
                                 break;
                             }
                             if (ch != ' ')
                             {
-                                ShowTypeOfLexeme(ref word);
+                                ShowTypeOfLexeme(ref word, ref writer);
                                 word = "";
                                 break;
                             }
@@ -167,7 +165,7 @@ namespace Compiler
                         case ClassOfSymbol.service_symbol:
                             if (symbolInWord == ClassOfSymbol.letter || (symbolInWord == ClassOfSymbol.numeral && ch != '.') || symbolInWord == ClassOfSymbol.service_symbol)
                             {
-                                ShowTypeOfLexeme(ref word);
+                                ShowTypeOfLexeme(ref word, ref writer);
                                 word = "";
                             }
 
@@ -187,7 +185,7 @@ namespace Compiler
 
                 if (word != "")
                 {
-                    ShowTypeOfLexeme(ref word);
+                    ShowTypeOfLexeme(ref word, ref writer);
                 }
             }
         }
