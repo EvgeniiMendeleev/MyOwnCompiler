@@ -25,7 +25,7 @@ namespace LibraryForCompile
             {"<=", TypeOfLexeme.logical_operator},  {">=", TypeOfLexeme.logical_operator}, {">", TypeOfLexeme.logical_operator}, 
             {"~=", TypeOfLexeme.logical_operator}, {"=", TypeOfLexeme.logical_operator}, {"+", TypeOfLexeme.arithmetic_operator}, 
             {"-", TypeOfLexeme.arithmetic_operator}, {"/", TypeOfLexeme.arithmetic_operator}, {"*", TypeOfLexeme.arithmetic_operator}, 
-            {" ", TypeOfLexeme.separator}, {";", TypeOfLexeme.separator},{",", TypeOfLexeme.separator}
+            {" ", TypeOfLexeme.separator}, {";", TypeOfLexeme.separator},{",", TypeOfLexeme.separator}, {":", TypeOfLexeme.arithmetic_operator}
         };
 
         public static ClassOfSymbol checkSymbol(char ch)
