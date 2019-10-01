@@ -165,11 +165,12 @@ namespace Compiler
                             break;
 
                         case ClassOfSymbol.service_symbol:
-                            if (symbolInWord == ClassOfSymbol.letter || symbolInWord == ClassOfSymbol.numeral)
+                            if (symbolInWord == ClassOfSymbol.letter || (symbolInWord == ClassOfSymbol.numeral && ch != '.') || symbolInWord == ClassOfSymbol.service_symbol)
                             {
                                 ShowTypeOfLexeme(ref word);
                                 word = "";
                             }
+
                             symbolInWord = ClassOfSymbol.service_symbol;
                             word += ch;
                             break;
