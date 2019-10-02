@@ -26,7 +26,7 @@ namespace Compiler
 
             FileStream textOfCode = new FileStream(filePath, FileMode.Open);
             StreamReader reader = new StreamReader(textOfCode);
-            StreamWriter writer = new StreamWriter(File.Create("d:\\ResultOfCompiler.txt"));
+            StreamWriter writer = new StreamWriter(File.Create("d:\\7091\\ResultOfCompiler.txt"));
 
             LexicalAnalsys(ref reader, ref writer);
 
@@ -141,7 +141,7 @@ namespace Compiler
                             break;
 
                         case ClassOfSymbol.separator:
-                            symbolInWord = ClassOfSymbol.separator;
+
                             if (word != "")
                             {
                                 ShowTypeOfLexeme(ref word, ref writer);
@@ -151,14 +151,18 @@ namespace Compiler
                                 {
                                     showTypeOfLexeme(ch, ref writer);
                                 }
-                                break;
                             }
-                            if (ch != ' ')
+                            else if (symbolInWord == ClassOfSymbol.null_class || (word == "" && ch != ' '))
+                            {
+                                word += ch;
+                            }
+                            else if (ch != ' ')
                             {
                                 ShowTypeOfLexeme(ref word, ref writer);
                                 word = "";
-                                break;
                             }
+
+                            symbolInWord = ClassOfSymbol.separator;
 
                             break;
 
@@ -167,6 +171,14 @@ namespace Compiler
                             {
                                 ShowTypeOfLexeme(ref word, ref writer);
                                 word = "";
+                            }
+                            else if (symbolInWord == ClassOfSymbol.separator)
+                            {
+                                if (word != "")
+                                {
+                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    word = "";
+                                }
                             }
 
                             symbolInWord = ClassOfSymbol.service_symbol;
