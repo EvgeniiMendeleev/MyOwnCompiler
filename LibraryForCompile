@@ -8,14 +8,14 @@ using System.IO;
 
 namespace LibraryForCompile
 {
-    enum TypeOfLexeme { id, arithmetic_operator, logical_operator, separator, service_word, constant_value };
+    enum TypeOfLexeme { id, arithmetic_operator, logical_operator, separator, service_word, constant_value, service_lexeme };
     enum ClassOfSymbol { null_class = -1, letter, numeral, arithmetic_sign, logical_sign, separator, service_symbol, another_symbol };
 
     abstract class Lexeme
     {
         public static Dictionary<string, TypeOfLexeme> tokens = new Dictionary<string, TypeOfLexeme>
         {
-            {"begin", TypeOfLexeme.service_word}, {"int", TypeOfLexeme.service_word}, {"float", TypeOfLexeme.service_word}, 
+            {"begin", TypeOfLexeme.service_word}, {"integer", TypeOfLexeme.service_word}, {"real", TypeOfLexeme.service_word}, 
             {"end", TypeOfLexeme.service_word}, {"for", TypeOfLexeme.service_word}, {"do", TypeOfLexeme.service_word}, 
             {"step", TypeOfLexeme.service_word}, {"until", TypeOfLexeme.service_word}, {"while", TypeOfLexeme.service_word}, 
             {"else", TypeOfLexeme.service_word}, {"if", TypeOfLexeme.service_word}, {"then", TypeOfLexeme.service_word}, 
@@ -25,7 +25,7 @@ namespace LibraryForCompile
             {"<=", TypeOfLexeme.logical_operator},  {">=", TypeOfLexeme.logical_operator}, {">", TypeOfLexeme.logical_operator}, 
             {"~=", TypeOfLexeme.logical_operator}, {"=", TypeOfLexeme.logical_operator}, {"+", TypeOfLexeme.arithmetic_operator}, 
             {"-", TypeOfLexeme.arithmetic_operator}, {"/", TypeOfLexeme.arithmetic_operator}, {"*", TypeOfLexeme.arithmetic_operator}, 
-            {" ", TypeOfLexeme.separator}, {";", TypeOfLexeme.separator},{",", TypeOfLexeme.separator}, {":", TypeOfLexeme.arithmetic_operator}
+            {";", TypeOfLexeme.separator}, {",", TypeOfLexeme.separator}, {":", TypeOfLexeme.service_lexeme}
         };
 
         public static ClassOfSymbol checkSymbol(char ch)
