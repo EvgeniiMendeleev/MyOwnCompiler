@@ -26,9 +26,9 @@ namespace Compiler
 
             FileStream textOfCode = new FileStream(filePath, FileMode.Open);
             StreamReader reader = new StreamReader(textOfCode);
-            StreamWriter writer = new StreamWriter(File.Create("d:\\7091\\ResultOfCompiler.txt"));
+            StreamWriter writer = new StreamWriter(File.Create("d:\\ResultOfCompiler.txt"));
 
-            LexicalAnalsys(ref reader, ref writer);
+            LexicalAnalisys(ref reader, ref writer);
 
             writer.Close();
             reader.Close();
@@ -41,21 +41,22 @@ namespace Compiler
         static void ShowTypeOfLexeme(ref string word, ref StreamWriter writer)
         {
             TypeOfLexeme type = Lexeme.isTypeOfLexeme(word);
-            writer.WriteLine(word + " имеет значение " + type);
+            writer.Write("<< " + word + " >> - " + type + ", ");
             //Console.WriteLine(word + " имеет значение " + type);
         }
 
         static void showTypeOfLexeme(char ch, ref StreamWriter writer)
         {
             TypeOfLexeme type = Lexeme.isTypeOfLexeme(Convert.ToString(ch));
-            writer.WriteLine(ch + " имеет значение " + type);
+            writer.Write("<< " + ch + " >> - " + type + ", ");
             //Console.WriteLine(ch + " имеет значение " + type);
         }
 
-        static void LexicalAnalsys(ref StreamReader reader, ref StreamWriter writer)
+        static void LexicalAnalisys(ref StreamReader reader, ref StreamWriter writer)
         {
             for (UInt64 numberOfLine = 1; !reader.EndOfStream; numberOfLine++)
             {
+                writer.Write(numberOfLine + ": ");
                 string strFromCode = reader.ReadLine();
 
                 ClassOfSymbol symbolInWord = ClassOfSymbol.null_class;
@@ -199,6 +200,8 @@ namespace Compiler
                 {
                     ShowTypeOfLexeme(ref word, ref writer);
                 }
+
+                writer.WriteLine();
             }
         }
     }
