@@ -189,8 +189,13 @@ namespace Compiler
                         case ClassOfSymbol.another_symbol:
                             if (ch != '\t')
                             {
+                                TypeOfLexeme type = Lexeme.isTypeOfLexeme(word);
+                                writer.Write("<< " + word + " >> - " + type + ", ");
+
+                                writer.Write("неразрешённый внешний символ << " + ch + " >>, ");
                                 symbolInWord = ClassOfSymbol.another_symbol;
-                                word += ch;
+
+                                word = "";
                             }
                             break;
                     }
