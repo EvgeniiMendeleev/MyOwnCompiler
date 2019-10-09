@@ -65,6 +65,8 @@ namespace Compiler
 
                 foreach (char ch in strFromCode)
                 {
+                    if (symbolInWord == ClassOfSymbol.another_symbol) break;
+
                     switch (Lexeme.checkSymbol(ch))
                     {
                         case ClassOfSymbol.arithmetic_sign:
@@ -189,12 +191,8 @@ namespace Compiler
                         case ClassOfSymbol.another_symbol:
                             if (ch != '\t')
                             {
-                                TypeOfLexeme type = Lexeme.isTypeOfLexeme(word);
-                                writer.Write("<< " + word + " >> - " + type + ", ");
-
                                 writer.Write("неразрешённый внешний символ << " + ch + " >>, ");
                                 symbolInWord = ClassOfSymbol.another_symbol;
-
                                 word = "";
                             }
                             break;
