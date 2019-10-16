@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using LibraryForCompile;
+using System.Globalization;
 
 namespace Compiler
 {
@@ -42,14 +43,12 @@ namespace Compiler
         {
             TypeOfLexeme type = Lexeme.isTypeOfLexeme(word);
             writer.Write("<< " + word + " >> - " + type + ", ");
-            //Console.WriteLine(word + " имеет значение " + type);
         }
 
         static void showTypeOfLexeme(char ch, ref StreamWriter writer)
         {
             TypeOfLexeme type = Lexeme.isTypeOfLexeme(Convert.ToString(ch));
             writer.Write("<< " + ch + " >> - " + type + ", ");
-            //Console.WriteLine(ch + " имеет значение " + type);
         }
 
         static void LexicalAnalisys(ref StreamReader reader, ref StreamWriter writer)
@@ -57,19 +56,19 @@ namespace Compiler
             for (UInt64 numberOfLine = 1; !reader.EndOfStream; numberOfLine++)
             {
                 writer.Write(numberOfLine + ": ");
-                string strFromCode = reader.ReadLine();
+                string strFromCode = reader.ReadLine();     //Read string from text file with program code.
 
-                ClassOfSymbol symbolInWord = ClassOfSymbol.null_class;
+                ClassOfSymbol symbolInWord = ClassOfSymbol.null_class;      
 
                 string word = "";
 
                 foreach (char ch in strFromCode)
                 {
-                    if (symbolInWord == ClassOfSymbol.another_symbol) break;
-
                     switch (Lexeme.checkSymbol(ch))
                     {
                         case ClassOfSymbol.arithmetic_sign:
+                            #region Some operations for arithmetic signs
+
                             if (symbolInWord != ClassOfSymbol.arithmetic_sign && symbolInWord != ClassOfSymbol.separator)
                             {
                                 ShowTypeOfLexeme(ref word, ref writer);
@@ -78,9 +77,13 @@ namespace Compiler
 
                             symbolInWord = ClassOfSymbol.arithmetic_sign;
                             word += ch;
+
+                            #endregion
                             break;
 
                         case ClassOfSymbol.letter:
+                            #region Some operations for letters
+
                             if (word != "")
                             {
                                 if (symbolInWord == ClassOfSymbol.logical_sign || (symbolInWord == ClassOfSymbol.numeral && Char.IsDigit(word[0])))
@@ -102,9 +105,13 @@ namespace Compiler
 
                             symbolInWord = ClassOfSymbol.letter;
                             word += ch;
+
+                            #endregion
                             break;
 
                         case ClassOfSymbol.logical_sign:
+                            #region Some operations for logical signs
+
                             if (symbolInWord != ClassOfSymbol.logical_sign && symbolInWord != ClassOfSymbol.separator)
                             {
                                 if (symbolInWord == ClassOfSymbol.service_symbol)
@@ -122,9 +129,13 @@ namespace Compiler
                             }
 
                             symbolInWord = ClassOfSymbol.logical_sign;
+
+                            #endregion
                             break;
 
                         case ClassOfSymbol.numeral:
+                            #region Some operations for numerals
+
                             if (word != "")
                             {
                                 if (symbolInWord == ClassOfSymbol.logical_sign || symbolInWord == ClassOfSymbol.arithmetic_sign)
@@ -141,9 +152,12 @@ namespace Compiler
 
                             symbolInWord = ClassOfSymbol.numeral;
                             word += ch;
+                            
+                            #endregion
                             break;
 
                         case ClassOfSymbol.separator:
+                            #region Some operations for separators
 
                             if (word != "")
                             {
@@ -167,9 +181,12 @@ namespace Compiler
 
                             symbolInWord = ClassOfSymbol.separator;
 
+                            #endregion
                             break;
 
                         case ClassOfSymbol.service_symbol:
+                            #region Some operations for service symbols
+
                             if (symbolInWord == ClassOfSymbol.letter || (symbolInWord == ClassOfSymbol.numeral && ch != '.') || symbolInWord == ClassOfSymbol.service_symbol)
                             {
                                 ShowTypeOfLexeme(ref word, ref writer);
@@ -186,18 +203,27 @@ namespace Compiler
 
                             symbolInWord = ClassOfSymbol.service_symbol;
                             word += ch;
+
+                            #endregion
                             break;
 
                         case ClassOfSymbol.another_symbol:
+                            #region Some operations for another symbols
                             if (ch != '\t')
                             {
                                 writer.Write("неразрешённый внешний символ << " + ch + " >>, ");
                                 symbolInWord = ClassOfSymbol.another_symbol;
                                 word = "";
                             }
+
+                            #endregion
                             break;
                     }
+
+                    if (symbolInWord == ClassOfSymbol.another_symbol) break;
                 }
+
+                if (symbolInWord == ClassOfSymbol.another_symbol) { break; }
 
                 if (word != "")
                 {
