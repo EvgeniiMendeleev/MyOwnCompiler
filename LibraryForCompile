@@ -13,21 +13,6 @@ namespace LibraryForCompile
 
     abstract class Lexeme
     {
-        public static Dictionary<string, TypeOfLexeme> tokens = new Dictionary<string, TypeOfLexeme>
-        {
-            {"begin", TypeOfLexeme.service_word}, {"integer", TypeOfLexeme.service_word}, {"real", TypeOfLexeme.service_word}, 
-            {"end", TypeOfLexeme.service_word}, {"for", TypeOfLexeme.service_word}, {"do", TypeOfLexeme.service_word}, 
-            {"step", TypeOfLexeme.service_word}, {"until", TypeOfLexeme.service_word}, {"while", TypeOfLexeme.service_word}, 
-            {"else", TypeOfLexeme.service_word}, {"if", TypeOfLexeme.service_word}, {"then", TypeOfLexeme.service_word}, 
-            {"eqv", TypeOfLexeme.service_word}, {"implies", TypeOfLexeme.service_word}, {"or", TypeOfLexeme.logical_operator}, 
-            {"and", TypeOfLexeme.logical_operator}, {"not", TypeOfLexeme.logical_operator}, {"true", TypeOfLexeme.service_word}, 
-            {"false", TypeOfLexeme.service_word}, {":=", TypeOfLexeme.arithmetic_operator}, {"<", TypeOfLexeme.logical_operator},
-            {"<=", TypeOfLexeme.logical_operator},  {">=", TypeOfLexeme.logical_operator}, {">", TypeOfLexeme.logical_operator}, 
-            {"~=", TypeOfLexeme.logical_operator}, {"=", TypeOfLexeme.logical_operator}, {"+", TypeOfLexeme.arithmetic_operator}, 
-            {"-", TypeOfLexeme.arithmetic_operator}, {"/", TypeOfLexeme.arithmetic_operator}, {"*", TypeOfLexeme.arithmetic_operator}, 
-            {";", TypeOfLexeme.separator}, {",", TypeOfLexeme.separator}, {":", TypeOfLexeme.service_lexeme}
-        };
-
         public static ClassOfSymbol checkSymbol(char ch)
         {
             if (Char.IsDigit(ch))
@@ -78,7 +63,6 @@ namespace LibraryForCompile
                 return TypeOfLexeme.constant_value;
             }
 
-
             TypeOfLexeme typeOfLexeme;
             bool resultOfSearch = tokens.TryGetValue(lexeme, out typeOfLexeme);
 
@@ -104,5 +88,21 @@ namespace LibraryForCompile
 
             return TypeOfLexeme.id;
         }
+
+        public static Dictionary<string, TypeOfLexeme> tokens = new Dictionary<string, TypeOfLexeme>
+        {
+            {"begin", TypeOfLexeme.service_word}, {"integer", TypeOfLexeme.service_word}, {"real", TypeOfLexeme.service_word}, 
+            {"end", TypeOfLexeme.service_word}, {"for", TypeOfLexeme.service_word}, {"do", TypeOfLexeme.service_word}, 
+            {"step", TypeOfLexeme.service_word}, {"until", TypeOfLexeme.service_word}, {"while", TypeOfLexeme.service_word}, 
+            {"else", TypeOfLexeme.service_word}, {"if", TypeOfLexeme.service_word}, {"then", TypeOfLexeme.service_word}, 
+            {"eqv", TypeOfLexeme.service_word}, {"implies", TypeOfLexeme.service_word}, {"or", TypeOfLexeme.logical_operator}, 
+            {"and", TypeOfLexeme.logical_operator}, {"not", TypeOfLexeme.logical_operator}, {"true", TypeOfLexeme.service_word}, 
+            {"false", TypeOfLexeme.service_word}, {":=", TypeOfLexeme.arithmetic_operator}, {"<", TypeOfLexeme.logical_operator},
+            {"<=", TypeOfLexeme.logical_operator},  {">=", TypeOfLexeme.logical_operator}, {">", TypeOfLexeme.logical_operator}, 
+            {"~=", TypeOfLexeme.logical_operator}, {"=", TypeOfLexeme.logical_operator}, {"+", TypeOfLexeme.arithmetic_operator}, 
+            {"-", TypeOfLexeme.arithmetic_operator}, {"/", TypeOfLexeme.arithmetic_operator}, {"*", TypeOfLexeme.arithmetic_operator}, 
+            {";", TypeOfLexeme.separator}, {",", TypeOfLexeme.separator}
+        };
+
     }
 }
