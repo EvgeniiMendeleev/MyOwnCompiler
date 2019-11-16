@@ -379,10 +379,18 @@ namespace LibraryForCompile
 
             while(true)
             {
-                if ((i == Lexeme.strOfCode.Count) && (shop.Peek() == "@"))
+                if ((i == Lexeme.strOfCode.Count))
                 {
-                    isEnd = true;
-                    break;
+                    if (shop.Peek() == "@")
+                    {
+                        isEnd = true;
+                        break;
+                    }
+                    else
+                    {
+                        isError = true;
+                        break;
+                    }
                 }
 
                 int numberOfRule = getNumberRule(Lexeme.strOfCode[i].Key);
