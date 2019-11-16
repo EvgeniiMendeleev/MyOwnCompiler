@@ -346,11 +346,11 @@ namespace LibraryForCompile
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 25, 0, 0, 0, 0, 0, 0, 35, 35, 35, 0 }, // 18
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 32, 32, 0, 0, 0, 0, 0, 0, 32, 32, 32, 0 }, // 19
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 38, 38, 0, 0, 0, 0, 0, 0, 38, 38, 38, 0 }, // 20
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 34, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34 }, // 21
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37 }, // 22
+            { 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 34, 34, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34 }, // 21
+            { 0, 0, 37, 0, 0, 0, 0, 0, 0, 0, 0, 37, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37 }, // 22
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41, 41, 41, 0, 0, 0, 0, 0, 0, 41, 41, 41, 0 }, // 23
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 39, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40 }, // 24
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43, 43, 43, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43 }, // 25
+            { 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 39, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40 }, // 24
+            { 0, 0, 43, 43, 0, 0, 0, 0, 0, 0, 0, 0, 43, 43, 43, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43 }, // 25
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 44, 50, 50, 0, 0, 0, 0, 0, 0, 50, 50, 50, 0 }, // 26
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 45, 46, 0, 0, 0, 0, 0, 0, 51, 51, 51, 0 }, // 27
             { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 47, 47, 0 }, // 28
@@ -363,7 +363,7 @@ namespace LibraryForCompile
         public static List<string> rules = new List<string>()
         {
             "<B>", "<K> <C>", "","<B>", "<T> <I>", "","<H> <S> <M>", "<B>", "<C>", "", "then <T>", ":= <V>", "", "<C> do <O> <I>",
-            "<j> <G> <O>", "<R>", "<Q> else <R> <M>", "<E>", "", "<P>", "", "<Q> until <Q>", "<Q>", "<h> <Q>", "<E>", "", "", "", "",
+            "<j> <G> <Q>", "<R>", "<Q> else <R> <M>", "<E>", "", "<P>", "", "<Q> until <Q>", "<Q>", "<h> <Q>", "<E>", "", "", "", "",
             "<U>", "<T> else <U> <M>", "<d> <X>", "<X>", "", "<k> <W>", "<W>", "", "<e> <Y>", "<Y>", "", "<w> <Z>", "<Z>", "", "<a>", "", "",
             "<g> <R>", "<R> <c>", "", "<a>", "<b>", "", "", "", "", ""
         };
@@ -512,7 +512,6 @@ namespace LibraryForCompile
                         break;
                     case 34:
                         pushOut();
-                        change(ref i);
                         break;
                     case 35:
                         insertReverse(getReverseString(numberOfRule - 1));
@@ -523,7 +522,6 @@ namespace LibraryForCompile
                         break;
                     case 37:
                         pushOut();
-                        change(ref i);
                         break;
                     case 38:
                         insertReverse(getReverseString(numberOfRule - 1));
@@ -534,7 +532,6 @@ namespace LibraryForCompile
                         break;
                     case 40:
                         pushOut();
-                        change(ref i);
                         break;
                     case 41:
                         insertReverse(getReverseString(numberOfRule - 1));
@@ -545,7 +542,6 @@ namespace LibraryForCompile
                         break;
                     case 43:
                         pushOut();
-                        change(ref i);
                         break;
                     case 44:
                         insertReverse(getReverseString(numberOfRule - 1));
@@ -567,7 +563,6 @@ namespace LibraryForCompile
                         break;
                     case 49:
                         pushOut();
-                        change(ref i);
                         break;
                     case 50:
                         insertReverse(getReverseString(numberOfRule - 1));
