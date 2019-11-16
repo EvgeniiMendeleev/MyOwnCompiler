@@ -8,11 +8,12 @@ using System.IO;
 
 namespace LibraryForCompile
 {
-    enum TypeOfLexeme { id, arithmetic_operator, logical_operator, separator, service_word, constant_value, service_lexeme };
+    enum TypeOfLexeme { id, arithmetic_operator, logical_operator, separator, service_word, real_value, integer_value, service_lexeme };
     enum ClassOfSymbol { null_class = -1, letter, numeral, arithmetic_sign, logical_sign, separator, service_symbol, another_symbol };
 
     abstract class Lexeme
     {
+        static public List<KeyValuePair<string, TypeOfLexeme>> strOfCode = new List<KeyValuePair<string, TypeOfLexeme>>();
         public static ClassOfSymbol checkSymbol(char ch)
         {
             if (Char.IsDigit(ch))
@@ -56,11 +57,11 @@ namespace LibraryForCompile
 
             if (Int32.TryParse(lexeme, out resultOne))
             {
-                return TypeOfLexeme.constant_value;
+                return TypeOfLexeme.integer_value;
             }
             if (Double.TryParse(lexeme, NumberStyles.Number, CultureInfo.InvariantCulture, out resultTwo))
             {
-                return TypeOfLexeme.constant_value;
+                return TypeOfLexeme.real_value;
             }
 
             TypeOfLexeme typeOfLexeme;
@@ -91,18 +92,586 @@ namespace LibraryForCompile
 
         public static Dictionary<string, TypeOfLexeme> tokens = new Dictionary<string, TypeOfLexeme>
         {
-            {"begin", TypeOfLexeme.service_word}, {"integer", TypeOfLexeme.service_word}, {"real", TypeOfLexeme.service_word}, 
-            {"end", TypeOfLexeme.service_word}, {"for", TypeOfLexeme.service_word}, {"do", TypeOfLexeme.service_word}, 
-            {"step", TypeOfLexeme.service_word}, {"until", TypeOfLexeme.service_word}, {"while", TypeOfLexeme.service_word}, 
-            {"else", TypeOfLexeme.service_word}, {"if", TypeOfLexeme.service_word}, {"then", TypeOfLexeme.service_word}, 
-            {"eqv", TypeOfLexeme.service_word}, {"implies", TypeOfLexeme.service_word}, {"or", TypeOfLexeme.logical_operator}, 
-            {"and", TypeOfLexeme.logical_operator}, {"not", TypeOfLexeme.logical_operator}, {"true", TypeOfLexeme.service_word}, 
+            {"begin", TypeOfLexeme.service_word}, {"integer", TypeOfLexeme.service_word}, {"real", TypeOfLexeme.service_word},
+            {"end", TypeOfLexeme.service_word}, {"for", TypeOfLexeme.service_word}, {"do", TypeOfLexeme.service_word},
+            {"step", TypeOfLexeme.service_word}, {"until", TypeOfLexeme.service_word}, {"while", TypeOfLexeme.service_word},
+            {"else", TypeOfLexeme.service_word}, {"if", TypeOfLexeme.service_word}, {"then", TypeOfLexeme.service_word},
+            {"eqv", TypeOfLexeme.service_word}, {"implies", TypeOfLexeme.service_word}, {"or", TypeOfLexeme.logical_operator},
+            {"and", TypeOfLexeme.logical_operator}, {"not", TypeOfLexeme.logical_operator}, {"true", TypeOfLexeme.service_word},
             {"false", TypeOfLexeme.service_word}, {":=", TypeOfLexeme.arithmetic_operator}, {"<", TypeOfLexeme.logical_operator},
-            {"<=", TypeOfLexeme.logical_operator},  {">=", TypeOfLexeme.logical_operator}, {">", TypeOfLexeme.logical_operator}, 
-            {"~=", TypeOfLexeme.logical_operator}, {"=", TypeOfLexeme.logical_operator}, {"+", TypeOfLexeme.arithmetic_operator}, 
-            {"-", TypeOfLexeme.arithmetic_operator}, {"/", TypeOfLexeme.arithmetic_operator}, {"*", TypeOfLexeme.arithmetic_operator}, 
-            {";", TypeOfLexeme.separator}, {",", TypeOfLexeme.separator}
+            {"<=", TypeOfLexeme.logical_operator},  {">=", TypeOfLexeme.logical_operator}, {">", TypeOfLexeme.logical_operator},
+            {"~=", TypeOfLexeme.logical_operator}, {"=", TypeOfLexeme.logical_operator}, {"+", TypeOfLexeme.arithmetic_operator},
+            {"-", TypeOfLexeme.arithmetic_operator}, {"/", TypeOfLexeme.arithmetic_operator}, {"*", TypeOfLexeme.arithmetic_operator},
+            {";", TypeOfLexeme.separator}, {",", TypeOfLexeme.separator}, {":", TypeOfLexeme.arithmetic_operator}
         };
 
+        static private void ShowTypeOfLexeme(ref string word, ref StreamWriter writer)
+        {
+            TypeOfLexeme type = Lexeme.isTypeOfLexeme(word);
+            strOfCode.Add(new KeyValuePair<string, TypeOfLexeme>(word, type));
+            writer.Write("<< " + word + " >> - " + type + ", ");
+        }
+
+        static private void showTypeOfLexeme(char ch, ref StreamWriter writer)
+        {
+            TypeOfLexeme type = Lexeme.isTypeOfLexeme(Convert.ToString(ch));
+            strOfCode.Add(new KeyValuePair<string, TypeOfLexeme>(Convert.ToString(ch), type));
+            writer.Write("<< " + ch + " >> - " + type + ", ");
+        }
+
+        static public void LexicalAnalisys(ref StreamReader reader, ref StreamWriter writer)
+        {
+            for (UInt64 numberOfLine = 1; !reader.EndOfStream; numberOfLine++)
+            {
+                writer.Write(numberOfLine + ": ");
+                string strFromCode = reader.ReadLine();     //Read string from text file with program code.
+
+                ClassOfSymbol symbolInWord = ClassOfSymbol.null_class;
+
+                string word = "";
+
+                foreach (char ch in strFromCode)
+                {
+                    switch (checkSymbol(ch))
+                    {
+                        case ClassOfSymbol.arithmetic_sign:
+                            #region Some operations for arithmetic signs
+
+                            if (symbolInWord != ClassOfSymbol.arithmetic_sign && symbolInWord != ClassOfSymbol.separator)
+                            {
+                                ShowTypeOfLexeme(ref word, ref writer);
+                                word = "";
+                            }
+
+                            symbolInWord = ClassOfSymbol.arithmetic_sign;
+                            word += ch;
+
+                            #endregion
+                            break;
+
+                        case ClassOfSymbol.letter:
+                            #region Some operations for letters
+
+                            if (word != "")
+                            {
+                                if (symbolInWord == ClassOfSymbol.logical_sign || (symbolInWord == ClassOfSymbol.numeral && Char.IsDigit(word[0])))
+                                {
+                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    word = "";
+                                }
+                                else if (symbolInWord == ClassOfSymbol.arithmetic_sign)
+                                {
+                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    word = "";
+                                }
+                                else if (symbolInWord == ClassOfSymbol.service_symbol)
+                                {
+                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    word = "";
+                                }
+                            }
+
+                            symbolInWord = ClassOfSymbol.letter;
+                            word += ch;
+
+                            #endregion
+                            break;
+
+                        case ClassOfSymbol.logical_sign:
+                            #region Some operations for logical signs
+
+                            if (symbolInWord != ClassOfSymbol.logical_sign && symbolInWord != ClassOfSymbol.separator)
+                            {
+                                if (symbolInWord == ClassOfSymbol.service_symbol)
+                                {
+                                    word += ch;
+                                }
+
+                                ShowTypeOfLexeme(ref word, ref writer);
+                                word = "";
+                            }
+
+                            if (symbolInWord != ClassOfSymbol.service_symbol)
+                            {
+                                word += ch;
+                            }
+
+                            symbolInWord = ClassOfSymbol.logical_sign;
+
+                            #endregion
+                            break;
+
+                        case ClassOfSymbol.numeral:
+                            #region Some operations for numerals
+
+                            if (word != "")
+                            {
+                                if (symbolInWord == ClassOfSymbol.logical_sign || symbolInWord == ClassOfSymbol.arithmetic_sign)
+                                {
+                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    word = "";
+                                }
+                                else if (symbolInWord == ClassOfSymbol.service_symbol && word[word.Length - 1] != '.')
+                                {
+                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    word = "";
+                                }
+                            }
+
+                            symbolInWord = ClassOfSymbol.numeral;
+                            word += ch;
+
+                            #endregion
+                            break;
+
+                        case ClassOfSymbol.separator:
+                            #region Some operations for separators
+
+                            if (word != "")
+                            {
+                                ShowTypeOfLexeme(ref word, ref writer);
+                                word = "";
+
+                                if (ch != ' ')
+                                {
+                                    showTypeOfLexeme(ch, ref writer);
+                                }
+                            }
+                            else if (symbolInWord == ClassOfSymbol.null_class || (word == "" && ch != ' '))
+                            {
+                                word += ch;
+                            }
+                            else if (ch != ' ')
+                            {
+                                ShowTypeOfLexeme(ref word, ref writer);
+                                word = "";
+                            }
+
+                            symbolInWord = ClassOfSymbol.separator;
+
+                            #endregion
+                            break;
+
+                        case ClassOfSymbol.service_symbol:
+                            #region Some operations for service symbols
+
+                            if (symbolInWord == ClassOfSymbol.letter || (symbolInWord == ClassOfSymbol.numeral && ch != '.') || symbolInWord == ClassOfSymbol.service_symbol)
+                            {
+                                ShowTypeOfLexeme(ref word, ref writer);
+                                word = "";
+                            }
+                            else if (symbolInWord == ClassOfSymbol.separator)
+                            {
+                                if (word != "")
+                                {
+                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    word = "";
+                                }
+                            }
+
+                            symbolInWord = ClassOfSymbol.service_symbol;
+                            word += ch;
+
+                            #endregion
+                            break;
+
+                        case ClassOfSymbol.another_symbol:
+                            #region Some operations for another symbols
+                            if (ch != '\t')
+                            {
+                                writer.Write("неразрешённый внешний символ << " + ch + " >>, ");
+                                symbolInWord = ClassOfSymbol.another_symbol;
+                                word = "";
+                            }
+
+                            #endregion
+                            break;
+                    }
+
+                    if (symbolInWord == ClassOfSymbol.another_symbol) break;
+                }
+
+                if (symbolInWord == ClassOfSymbol.another_symbol) { break; }
+
+                if (word != "")
+                {
+                    ShowTypeOfLexeme(ref word, ref writer);
+                }
+
+                writer.WriteLine();
+            }
+        }
+
+    }
+
+    abstract class Syntax
+    {
+
+        private static List<string> columns = new List<string>()
+        {
+            "begin", "end", ";", ":=", "for", "do",
+            ",", "step", "while", "if", "then", "else",
+            "eqv", "or", "implies", "and", "not", "true",
+            "false", "<", "<=", "=", ">=", ">", "~=", "ID",
+            "INTEGER", "REAL", "@"
+        };
+        private static List<string> rows = new List<string>()
+        {
+            "<S>", "<B>", "<C>", "<K>", "<I>", "<T>",
+            "<M>", "<H>", "<V>", "<O>", "<Q>", "<G>",
+            "<j>", "<R>", "<P>", "<E>", "<h>", "<U>",
+            "<W>", "<X>", "<d>", "<k>", "<Y>", "<e>",
+            "<w>", "<Z>", "<a>", "<b>", "<g>", "<c>"
+        };
+
+        private static int[,] administratorTable = new int[,]
+        {
+            { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 1
+            { 2, 2, 2, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2 }, // 2
+            { 8, 6, 6, 0, 14, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 6 }, // 3
+            { 0, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 4
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0 }, // 5
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 0, 30, 30, 0, 0, 0, 0, 0, 0,30, 30, 30, 0 }, // 6
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 7
+            { 0, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10 }, // 8
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 0, 0, 0 }, // 9
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 15, 0 }, // 10
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 16, 16, 0 }, // 11
+            { 0, 0, 0, 0, 0, 19, 19, 18, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21 }, // 12
+            { 0, 0, 0, 0, 0, 21, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 13
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 27, 28, 0 }, // 14
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 24, 24, 0 }, // 15
+            { 0, 0, 0, 0, 0, 0, 0, 22, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, // 16
+            { 0, 0, 0, 0, 0, 26, 0, 25, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26 }, // 17
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 25, 0, 0, 0, 0, 0, 0, 35, 35, 35, 0 }, // 18
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 32, 32, 0, 0, 0, 0, 0, 0, 32, 32, 32, 0 }, // 19
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 38, 38, 0, 0, 0, 0, 0, 0, 38, 38, 38, 0 }, // 20
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 34, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34 }, // 21
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37 }, // 22
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41, 41, 41, 0, 0, 0, 0, 0, 0, 41, 41, 41, 0 }, // 23
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 39, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40 }, // 24
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43, 43, 43, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43 }, // 25
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 44, 50, 50, 0, 0, 0, 0, 0, 0, 50, 50, 50, 0 }, // 26
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 45, 46, 0, 0, 0, 0, 0, 0, 51, 51, 51, 0 }, // 27
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 47, 47, 0 }, // 28
+            { 0, 0, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 49, 49, 0, 0, 0, 48, 48, 48, 48, 48, 48, 0, 0, 0, 49 }, // 29
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 52, 53, 54, 55, 57, 56, 0, 0, 0, 0 }  // 30
+        };
+
+        public static Stack<string> shop = new Stack<string>();
+
+        public static List<string> rules = new List<string>()
+        {
+            "<B>", "<K> <C>", "","<B>", "<T> <I>", "","<H> <S> <M>", "<B>", "<C>", "", "then <T>", ":= <V>", "", "<C> do <O> <I>",
+            "<j> <G> <O>", "<R>", "<Q> else <R> <M>", "<E>", "", "<P>", "", "<Q> until <Q>", "<Q>", "<h> <Q>", "<E>", "", "", "", "",
+            "<U>", "<T> else <U> <M>", "<d> <X>", "<X>", "", "<k> <W>", "<W>", "", "<e> <Y>", "<Y>", "", "<w> <Z>", "<Z>", "", "<a>", "", "",
+            "<g> <R>", "<R> <c>", "", "<a>", "<b>", "", "", "", "", ""
+        };
+
+        public static void SyntaxisAnalysis(ref StreamReader reader, ref StreamWriter writer)
+        {
+            shop.Push("@");
+            shop.Push("<S>");
+
+            int i = 0;
+            bool isError = false;
+            bool isEnd = false;
+
+            while(true)
+            {
+                if ((i == Lexeme.strOfCode.Count) && (shop.Peek() == "@"))
+                {
+                    isEnd = true;
+                    break;
+                }
+
+                int numberOfRule = getNumberRule(Lexeme.strOfCode[i].Key);
+
+                switch (numberOfRule)
+                {
+                    case -1:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 1:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 2:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 3:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 4:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 5:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 6:
+                        pushOut();
+                        break;
+                    case 7:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 8:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 9:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 10:
+                        pushOut();
+                        break;
+                    case 11:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 12:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 13:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 14:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 15:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 16:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 17:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 18:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 19:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 20:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 21:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 22:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 23:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 24:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 25:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 26:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 27:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 28:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 29:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 30:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 31:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 32:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 33:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 34:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 35:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 36:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 37:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 38:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 39:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 40:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 41:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 42:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 43:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 44:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        change(ref i);
+                        break;
+                    case 45:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 46:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 47:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 48:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 49:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 50:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 51:
+                        insertReverse(getReverseString(numberOfRule - 1));
+                        break;
+                    case 52:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 53:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 54:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 55:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 56:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    case 57:
+                        pushOut();
+                        change(ref i);
+                        break;
+                    default:
+                        isError = true;
+                        break;
+                }
+
+                if (isError) break;
+            }
+
+            if (isEnd)
+            {
+                Console.WriteLine("Синтаксический анализ прошёл успешно!");
+            }
+            else if (isError)
+            {
+                Console.WriteLine("Ошибка в коде ALGOL-60!");
+            }
+
+            Lexeme.strOfCode.Clear();
+        }
+
+        private static string getReverseString(int numberOfRule)
+        {
+            return rules[numberOfRule];
+        }
+
+        private static int getNumberRule(string pointer)
+        {
+            if (pointer == shop.Peek())
+            {
+                return -1;
+            }
+            int j, i;
+
+            if (Lexeme.isTypeOfLexeme(pointer) == TypeOfLexeme.id)
+            {
+                j = 25;
+            }
+            else if (Lexeme.isTypeOfLexeme(pointer) == TypeOfLexeme.integer_value)
+            {
+                j = 26;
+            }
+            else if (Lexeme.isTypeOfLexeme(pointer) == TypeOfLexeme.real_value)
+            {
+                j = 27;
+            }
+            else
+            {
+                j = columns.IndexOf(pointer);
+            }
+
+            i = rows.IndexOf(shop.Peek());
+
+            return administratorTable[i,j];
+        }
+
+        public static void insertReverse(string reverseString)
+        {
+            shop.Pop();
+
+            foreach (string str in reverseString.Split(' '))
+            {
+                shop.Push(str);
+            }
+        }
+
+        public static void change(ref int position)
+        {
+            ++position;
+        }
+
+        public static void pushOut()
+        {
+            shop.Pop();
+        }
     }
 }
