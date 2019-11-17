@@ -32,8 +32,11 @@ namespace Compiler
             StreamReader reader = new StreamReader(textOfCode);
             StreamWriter writer = new StreamWriter(File.Create("e:\\result.txt"));
 
-            Lexeme.LexicalAnalisys(ref reader, ref writer);
-            Syntax.SyntaxisAnalysis(ref reader, ref writer);
+            if (!Lexeme.LexicalAnalisys(ref reader, ref writer))
+            {
+                Console.WriteLine("Лексический анализ прошёл успешно!");
+                Syntax.SyntaxisAnalysis(ref reader, ref writer);
+            }
 
             writer.Close();
             reader.Close();
