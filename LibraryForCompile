@@ -13,7 +13,7 @@ namespace LibraryForCompile
 
     abstract class Lexeme
     {
-        static public List<KeyValuePair<string, TypeOfLexeme>> strOfCode = new List<KeyValuePair<string, TypeOfLexeme>>();
+        static public List<List<string>> strOfCode = new List<List<string>>();
         public static ClassOfSymbol checkSymbol(char ch)
         {
             if (Char.IsDigit(ch))
@@ -105,23 +105,35 @@ namespace LibraryForCompile
             {";", TypeOfLexeme.separator}, {",", TypeOfLexeme.separator}, {":", TypeOfLexeme.arithmetic_operator}
         };
 
-        static private void ShowTypeOfLexeme(ref string word, ref StreamWriter writer)
+        static private void ShowTypeOfLexeme(ref string word, ref StreamWriter writer, ref int numberOfRow)
         {
             TypeOfLexeme type = Lexeme.isTypeOfLexeme(word);
-            strOfCode.Add(new KeyValuePair<string, TypeOfLexeme>(word, type));
+            List<string> row = new List<string>();
+
+            row.Add(Convert.ToString(numberOfRow));
+            row.Add(word);
+
+            strOfCode.Add(row);
             writer.Write("<< " + word + " >> - " + type + ", ");
         }
 
-        static private void showTypeOfLexeme(char ch, ref StreamWriter writer)
+        static private void showTypeOfLexeme(char ch, ref StreamWriter writer, ref int numberOfRow)
         {
             TypeOfLexeme type = Lexeme.isTypeOfLexeme(Convert.ToString(ch));
-            strOfCode.Add(new KeyValuePair<string, TypeOfLexeme>(Convert.ToString(ch), type));
+            List<string> row = new List<string>();
+
+            row.Add(Convert.ToString(numberOfRow));
+            row.Add(Convert.ToString(ch));
+
+            strOfCode.Add(row);
             writer.Write("<< " + ch + " >> - " + type + ", ");
         }
 
-        static public void LexicalAnalisys(ref StreamReader reader, ref StreamWriter writer)
+        static public bool LexicalAnalisys(ref StreamReader reader, ref StreamWriter writer)
         {
-            for (UInt64 numberOfLine = 1; !reader.EndOfStream; numberOfLine++)
+            bool isError = false;
+
+            for (int numberOfLine = 1; !reader.EndOfStream; numberOfLine++)
             {
                 writer.Write(numberOfLine + ": ");
                 string strFromCode = reader.ReadLine();     //Read string from text file with program code.
@@ -139,7 +151,7 @@ namespace LibraryForCompile
 
                             if (symbolInWord != ClassOfSymbol.arithmetic_sign && symbolInWord != ClassOfSymbol.separator)
                             {
-                                ShowTypeOfLexeme(ref word, ref writer);
+                                ShowTypeOfLexeme(ref word, ref writer, ref numberOfLine);
                                 word = "";
                             }
 
@@ -156,17 +168,17 @@ namespace LibraryForCompile
                             {
                                 if (symbolInWord == ClassOfSymbol.logical_sign || (symbolInWord == ClassOfSymbol.numeral && Char.IsDigit(word[0])))
                                 {
-                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    ShowTypeOfLexeme(ref word, ref writer, ref numberOfLine);
                                     word = "";
                                 }
                                 else if (symbolInWord == ClassOfSymbol.arithmetic_sign)
                                 {
-                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    ShowTypeOfLexeme(ref word, ref writer, ref numberOfLine);
                                     word = "";
                                 }
                                 else if (symbolInWord == ClassOfSymbol.service_symbol)
                                 {
-                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    ShowTypeOfLexeme(ref word, ref writer, ref numberOfLine);
                                     word = "";
                                 }
                             }
@@ -187,7 +199,7 @@ namespace LibraryForCompile
                                     word += ch;
                                 }
 
-                                ShowTypeOfLexeme(ref word, ref writer);
+                                ShowTypeOfLexeme(ref word, ref writer, ref numberOfLine);
                                 word = "";
                             }
 
@@ -208,12 +220,12 @@ namespace LibraryForCompile
                             {
                                 if (symbolInWord == ClassOfSymbol.logical_sign || symbolInWord == ClassOfSymbol.arithmetic_sign)
                                 {
-                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    ShowTypeOfLexeme(ref word, ref writer, ref numberOfLine);
                                     word = "";
                                 }
                                 else if (symbolInWord == ClassOfSymbol.service_symbol && word[word.Length - 1] != '.')
                                 {
-                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    ShowTypeOfLexeme(ref word, ref writer, ref numberOfLine);
                                     word = "";
                                 }
                             }
@@ -229,12 +241,12 @@ namespace LibraryForCompile
 
                             if (word != "")
                             {
-                                ShowTypeOfLexeme(ref word, ref writer);
+                                ShowTypeOfLexeme(ref word, ref writer, ref numberOfLine);
                                 word = "";
 
                                 if (ch != ' ')
                                 {
-                                    showTypeOfLexeme(ch, ref writer);
+                                    showTypeOfLexeme(ch, ref writer, ref numberOfLine);
                                 }
                             }
                             else if (symbolInWord == ClassOfSymbol.null_class || (word == "" && ch != ' '))
@@ -243,7 +255,7 @@ namespace LibraryForCompile
                             }
                             else if (ch != ' ')
                             {
-                                ShowTypeOfLexeme(ref word, ref writer);
+                                ShowTypeOfLexeme(ref word, ref writer, ref numberOfLine);
                                 word = "";
                             }
 
@@ -257,14 +269,14 @@ namespace LibraryForCompile
 
                             if (symbolInWord == ClassOfSymbol.letter || (symbolInWord == ClassOfSymbol.numeral && ch != '.') || symbolInWord == ClassOfSymbol.service_symbol)
                             {
-                                ShowTypeOfLexeme(ref word, ref writer);
+                                ShowTypeOfLexeme(ref word, ref writer, ref numberOfLine);
                                 word = "";
                             }
                             else if (symbolInWord == ClassOfSymbol.separator)
                             {
                                 if (word != "")
                                 {
-                                    ShowTypeOfLexeme(ref word, ref writer);
+                                    ShowTypeOfLexeme(ref word, ref writer, ref numberOfLine);
                                     word = "";
                                 }
                             }
@@ -279,6 +291,8 @@ namespace LibraryForCompile
                             #region Some operations for another symbols
                             if (ch != '\t')
                             {
+                                Console.WriteLine("Ошибка на этапе лексического анализа!");
+                                Console.WriteLine("неразрешённый внешний символ << " + ch + " >>, ");
                                 writer.Write("неразрешённый внешний символ << " + ch + " >>, ");
                                 symbolInWord = ClassOfSymbol.another_symbol;
                                 word = "";
@@ -291,15 +305,17 @@ namespace LibraryForCompile
                     if (symbolInWord == ClassOfSymbol.another_symbol) break;
                 }
 
-                if (symbolInWord == ClassOfSymbol.another_symbol) { break; }
+                if (symbolInWord == ClassOfSymbol.another_symbol) { isError = true; break; }
 
                 if (word != "")
                 {
-                    ShowTypeOfLexeme(ref word, ref writer);
+                    ShowTypeOfLexeme(ref word, ref writer, ref numberOfLine);
                 }
 
                 writer.WriteLine();
             }
+
+            return isError;
         }
 
     }
@@ -393,7 +409,7 @@ namespace LibraryForCompile
                     }
                 }
 
-                int numberOfRule = getNumberRule(Lexeme.strOfCode[i].Key);
+                int numberOfRule = getNumberRule(Lexeme.strOfCode[i][1]);
 
                 switch (numberOfRule)
                 {
@@ -613,7 +629,12 @@ namespace LibraryForCompile
             }
             else if (isError)
             {
-                Console.WriteLine("Ошибка в коде ALGOL-60!");
+                Console.WriteLine("Ошибка на этапе синтаксического анализа");
+                if (i == Lexeme.strOfCode.Count)
+                {
+                    --i;
+                }
+                Console.WriteLine(Lexeme.strOfCode[i][0] + ": встретилось " + Lexeme.strOfCode[i][1] + ", когда ожидалось " + shop.Peek() + " выражение.");
             }
 
             Lexeme.strOfCode.Clear();
