@@ -27,10 +27,10 @@ namespace Compiler
             Console.Write("Введите путь для вывода результата компиляции (файл должен быть в формате .txt): ");
             string resultFile = Console.ReadLine();*/
 
-            FileStream textOfCode = new FileStream("e:\\algol.txt", FileMode.Open);
+            FileStream textOfCode = new FileStream("d:\\algol.txt", FileMode.Open);
 
             StreamReader reader = new StreamReader(textOfCode);
-            StreamWriter writer = new StreamWriter(File.Create("e:\\result.txt"));
+            StreamWriter writer = new StreamWriter(File.Create("d:\\result.txt"));
 
             if (!Lexeme.LexicalAnalisys(ref reader, ref writer))
             {
