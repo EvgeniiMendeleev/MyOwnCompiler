@@ -1,0 +1,6 @@
+begin
+	for g := 5 while 6 < olp do
+		begin
+			k := l implies 8;
+		end
+end

@@ -1,0 +1,18 @@
+begin
+	begin
+	for g := 5 step 5 until l do
+		begin
+		if o eqv p then
+			begin
+			if u implies Ojfklds then
+				begin
+					if K and F then
+						begin
+							if 5 ~= 9 then
+								begin
+								end
+						end
+			end
+		end
+	end
+end

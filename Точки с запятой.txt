@@ -1,0 +1,11 @@
+begin
+	begin
+	for g := 5 step 5 until l do
+		begin
+		if o eqv p then
+			begin
+			;;;;;;;;;;;;;;;;;;;;;;;;;;; ;
+			end
+		end
+	end
+end
