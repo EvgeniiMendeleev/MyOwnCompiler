@@ -31,18 +31,24 @@ namespace Compiler
 
             StreamReader reader = new StreamReader(textOfCode);
             StreamWriter writer = new StreamWriter(File.Create("d:\\result.txt"));
-
+            writer.WriteLine("***************************************");
             if (!Lexeme.LexicalAnalisys(ref reader, ref writer))
             {
-                Console.WriteLine("Лексический анализ прошёл успешно!");
-                Syntax.SyntaxisAnalysis(ref reader, ref writer);
+                writer.WriteLine("Лексический анализ прошёл успешно!");
+                writer.WriteLine("***************************************");
+                
+                if (!Syntax.SyntaxisAnalysis(ref reader, ref writer))
+                {
+                    CodeGenerator.Generation();
+                }
+
+                writer.WriteLine("***************************************");
             }
 
+            writer.WriteLine("\nКомпиляция завершена!");
+            
             writer.Close();
             reader.Close();
-
-            Console.WriteLine("\nКомпиляция завершена!");
-            Console.ReadKey();
         }
     }
 }
