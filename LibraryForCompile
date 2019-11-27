@@ -384,7 +384,7 @@ namespace LibraryForCompile
             "<g> <R>", "<R> <c>", "", "<a>", "<b>", "", "", "", "", "", ""
         };
 
-        public static void SyntaxisAnalysis(ref StreamReader reader, ref StreamWriter writer)
+        public static bool SyntaxisAnalysis(ref StreamReader reader, ref StreamWriter writer)
         {
             shop.Push("@");
             shop.Push("<S>");
@@ -413,6 +413,12 @@ namespace LibraryForCompile
 
                 switch (numberOfRule)
                 {
+                    //case i:  <-- Номер правила
+                    //...
+                    //Какие - то действия по правилу i
+                    //...
+                    //break;
+                    #region Operations on rule
                     case -1:
                         pushOut();
                         change(ref i);
@@ -615,6 +621,7 @@ namespace LibraryForCompile
                         pushOut();
                         change(ref i);
                         break;
+                    #endregion
                     default:
                         isError = true;
                         break;
@@ -625,19 +632,19 @@ namespace LibraryForCompile
 
             if (isEnd)
             {
-                Console.WriteLine("Синтаксический анализ прошёл успешно!");
+                writer.WriteLine("Синтаксический анализ прошёл успешно!");
             }
             else if (isError)
             {
-                Console.WriteLine("Ошибка на этапе синтаксического анализа");
+                writer.WriteLine("Ошибка на этапе синтаксического анализа");
                 if (i == Lexeme.strOfCode.Count)
                 {
                     --i;
                 }
-                Console.WriteLine(Lexeme.strOfCode[i][0] + ": встретилось " + Lexeme.strOfCode[i][1] + ", когда ожидалось " + shop.Peek() + " выражение.");
+               writer.WriteLine(Lexeme.strOfCode[i][0] + ": встретилось " + Lexeme.strOfCode[i][1] + ", когда ожидалось " + shop.Peek() + " выражение.");
             }
 
-            Lexeme.strOfCode.Clear();
+            return isError;
         }
 
         private static string getReverseString(int numberOfRule)
@@ -698,6 +705,104 @@ namespace LibraryForCompile
         public static void pushOut()
         {
             shop.Pop();
+        }
+    }
+
+    abstract class CodeGenerator
+    {
+        public static void Generation()
+        {
+            StreamWriter wrFile = new StreamWriter(File.Create("d:\\CodeGenerationResult.txt"));
+           
+            List<List<string>> code = new List<List<string>>();
+            List<string> str = new List<string>();
+            
+            for (int i = 0; i < Lexeme.strOfCode.Count; i++)
+            {
+                str.Add(Lexeme.strOfCode[i][1]);
+
+                if (i == Lexeme.strOfCode.Count - 1)
+                {
+                    code.Add(str);
+                    str = null;
+                }
+                else if (Convert.ToInt32(Lexeme.strOfCode[i][0]) != Convert.ToInt32(Lexeme.strOfCode[i + 1][0]))
+                {
+                    code.Add(str);
+                    str = new List<string>();
+                }
+            }
+
+            uint CounterOfLabel = 1;
+            uint count = 1;
+            uint ciclesCounter = 0;
+            
+            Stack<int> cicles = new Stack<int>();
+            Stack<string> variablesOfCicles = new Stack<string>();
+
+            for (int i = 0; i < code.Count; i++)
+            {
+                for (int j = 0; j < code[i].Count; j++)
+                {
+                    if (code[i][j] == ":=")
+                    {
+                        wrFile.WriteLine("MOV " + code[i][j - 1] + ", " + code[i][j + 1]);
+                    }
+                    else if (code[i][j] == "for")
+                    {
+                        ++ciclesCounter;
+
+                        if (code[i][j + 4] == "while")
+                        {
+                            wrFile.WriteLine("MOV " + code[i][j + 1] + ", " + code[i][j + 3]);
+                            wrFile.WriteLine("MOV R" + CounterOfLabel + ", " + code[i][j + 5]);
+                            wrFile.WriteLine("M" + CounterOfLabel + ": CMP " + code[i][j + 1] + ", R" + CounterOfLabel);
+                            wrFile.WriteLine("JL Q" + CounterOfLabel);
+
+                            variablesOfCicles.Push(code[i][j + 1]);
+                            cicles.Push(0);
+                            ++CounterOfLabel;
+                            j += 6;
+                        }
+                        else if (code[i][j + 4] == "step")
+                        {
+                            wrFile.WriteLine("MOV " + code[i][j + 1] + ", " + code[i][j + 3]);
+                            wrFile.WriteLine("MOV R" + CounterOfLabel + ", " + code[i][j + 5]);
+                            wrFile.WriteLine("MOV N" + CounterOfLabel + ", " + code[i][j + 7]);
+                            wrFile.WriteLine("M" + CounterOfLabel + ": CMP " + code[i][j + 1] + ", N" + CounterOfLabel);
+                            wrFile.WriteLine("JL Q" + CounterOfLabel);
+
+                            variablesOfCicles.Push(code[i][j + 1]);
+                            ++CounterOfLabel;
+                            cicles.Push(1);
+                            j += 7;
+                        }
+                    }
+                    else if ((code[i][j] == "end") && (ciclesCounter > 0))
+                    {
+                        if (cicles.Pop() == 0)
+                        {
+                            wrFile.WriteLine("INC " + variablesOfCicles.Pop());
+                        }
+                        else
+                        {
+                            wrFile.WriteLine("ADD " + variablesOfCicles.Pop() + ", R" + CounterOfLabel);
+                        }
+
+                        wrFile.WriteLine("JUMP M" + (CounterOfLabel - count));
+                        wrFile.WriteLine("Q" + (CounterOfLabel - count) + ":");
+
+                        if (ciclesCounter > 0) --ciclesCounter;
+                        if (count++ == ciclesCounter) count = 0;
+                    }
+                    else if (code[i][j] == "if")
+                    {
+ 
+                    }
+                }
+            }
+
+            wrFile.Close();
         }
     }
 }
