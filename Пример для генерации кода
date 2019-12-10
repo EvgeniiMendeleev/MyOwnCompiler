@@ -1,0 +1,16 @@
+begin
+	for MyVariable := 1 while ArraySize do
+		begin
+			if MyVariable and 121 then
+				begin
+					for Yabadabaduuuu :=2 step 5 until 100 do
+						begin
+							BELLO:=15;
+						end
+				end
+			else
+				begin
+					NotBELLO:=90;
+				end
+		end
+end
