@@ -823,6 +823,7 @@ namespace LibraryForCompile
                         else if (code[i + 2] == "implies")
                         {
                             wrFile.WriteLine("MOV tempReg, " + code[i + 1]);
+                            wrFile.WriteLine("NOT tempReg");
                             wrFile.WriteLine("OR tempReg, " + code[i + 3]);
                             wrFile.WriteLine("JZ K" + ConditionLabel);
 
