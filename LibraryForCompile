@@ -714,93 +714,125 @@ namespace LibraryForCompile
         {
             StreamWriter wrFile = new StreamWriter(File.Create("d:\\CodeGenerationResult.txt"));
            
-            List<List<string>> code = new List<List<string>>();
-            List<string> str = new List<string>();
+            List<string> code = new List<string>();
             
             for (int i = 0; i < Lexeme.strOfCode.Count; i++)
             {
-                str.Add(Lexeme.strOfCode[i][1]);
-
-                if (i == Lexeme.strOfCode.Count - 1)
-                {
-                    code.Add(str);
-                    str = null;
-                }
-                else if (Convert.ToInt32(Lexeme.strOfCode[i][0]) != Convert.ToInt32(Lexeme.strOfCode[i + 1][0]))
-                {
-                    code.Add(str);
-                    str = new List<string>();
-                }
+                code.Add(Lexeme.strOfCode[i][1]);
             }
 
             uint CounterOfLabel = 1;
-            uint count = 1;
+            uint count1 = 1;
             uint ciclesCounter = 0;
+
+            uint ConditionLabel = 1;
+            uint count2 = 1;
+            uint conditionCounter = 0;
             
-            Stack<int> cicles = new Stack<int>();
+            Stack<int> ciclesAndCondition = new Stack<int>();
             Stack<string> variablesOfCicles = new Stack<string>();
 
             for (int i = 0; i < code.Count; i++)
             {
-                for (int j = 0; j < code[i].Count; j++)
-                {
-                    if (code[i][j] == ":=")
+                    if (code[i] == ":=")
                     {
-                        wrFile.WriteLine("MOV " + code[i][j - 1] + ", " + code[i][j + 1]);
+                        wrFile.WriteLine("MOV " + code[i - 1] + ", " + code[i + 1]);
                     }
-                    else if (code[i][j] == "for")
+                    else if (code[i] == "for")
                     {
                         ++ciclesCounter;
 
-                        if (code[i][j + 4] == "while")
+                        if (code[i + 4] == "while")
                         {
-                            wrFile.WriteLine("MOV " + code[i][j + 1] + ", " + code[i][j + 3]);
-                            wrFile.WriteLine("MOV R" + CounterOfLabel + ", " + code[i][j + 5]);
-                            wrFile.WriteLine("M" + CounterOfLabel + ": CMP " + code[i][j + 1] + ", R" + CounterOfLabel);
-                            wrFile.WriteLine("JL Q" + CounterOfLabel);
+                            wrFile.WriteLine("MOV " + code[i + 1] + ", " + code[i + 3]);
+                            wrFile.WriteLine("MOV R" + CounterOfLabel + ", " + code[i + 5]);
+                            wrFile.WriteLine("M" + CounterOfLabel + ": CMP " + code[i + 1] + ", R" + CounterOfLabel);
+                            wrFile.WriteLine("JG Q" + CounterOfLabel);
 
-                            variablesOfCicles.Push(code[i][j + 1]);
-                            cicles.Push(0);
+                            variablesOfCicles.Push(code[i + 1]);
+                            ciclesAndCondition.Push(0);
                             ++CounterOfLabel;
-                            j += 6;
+                            i += 6;
                         }
-                        else if (code[i][j + 4] == "step")
+                        else if (code[i + 4] == "step")
                         {
-                            wrFile.WriteLine("MOV " + code[i][j + 1] + ", " + code[i][j + 3]);
-                            wrFile.WriteLine("MOV R" + CounterOfLabel + ", " + code[i][j + 5]);
-                            wrFile.WriteLine("MOV N" + CounterOfLabel + ", " + code[i][j + 7]);
-                            wrFile.WriteLine("M" + CounterOfLabel + ": CMP " + code[i][j + 1] + ", N" + CounterOfLabel);
-                            wrFile.WriteLine("JL Q" + CounterOfLabel);
+                            wrFile.WriteLine("MOV " + code[i + 1] + ", " + code[i + 3]);
+                            wrFile.WriteLine("MOV R" + CounterOfLabel + ", " + code[i + 5]);
+                            wrFile.WriteLine("MOV N" + CounterOfLabel + ", " + code[i + 7]);
+                            wrFile.WriteLine("M" + CounterOfLabel + ": CMP " + code[i + 1] + ", N" + CounterOfLabel);
+                            wrFile.WriteLine("JG Q" + CounterOfLabel);
 
-                            variablesOfCicles.Push(code[i][j + 1]);
+                            variablesOfCicles.Push(code[i + 1]);
                             ++CounterOfLabel;
-                            cicles.Push(1);
-                            j += 7;
+                            ciclesAndCondition.Push(1);
+                            i += 7;
                         }
                     }
-                    else if ((code[i][j] == "end") && (ciclesCounter > 0))
+                    else if ((code[i] == "end"))
                     {
-                        if (cicles.Pop() == 0)
+                        if (ciclesCounter > 0 && (ciclesAndCondition.Peek() == 0 || ciclesAndCondition.Peek() == 1))
                         {
-                            wrFile.WriteLine("INC " + variablesOfCicles.Pop());
+                            if (ciclesAndCondition.Pop() == 0)
+                            {
+                                wrFile.WriteLine("INC " + variablesOfCicles.Pop());
+                            }
+                            else
+                            {
+                                wrFile.WriteLine("ADD " + variablesOfCicles.Pop() + ", R" + CounterOfLabel);
+                            }
+
+                            wrFile.WriteLine("JUMP M" + (CounterOfLabel - count1));
+                            wrFile.WriteLine("Q" + (CounterOfLabel - count1) + ":");
+
+                            if (ciclesCounter > 0) --ciclesCounter;
+                            if (++count1 == ciclesCounter) count1 = 0;
                         }
-                        else
+                        else if (conditionCounter > 0 && ciclesAndCondition.Peek() == 2)
                         {
-                            wrFile.WriteLine("ADD " + variablesOfCicles.Pop() + ", R" + CounterOfLabel);
+                            wrFile.WriteLine("K" + (ConditionLabel - count2) + ":");
+                            ciclesAndCondition.Pop();
+
+                            if (conditionCounter > 0) --conditionCounter;
+                            if (++count2 == conditionCounter) count2 = 0;
                         }
-
-                        wrFile.WriteLine("JUMP M" + (CounterOfLabel - count));
-                        wrFile.WriteLine("Q" + (CounterOfLabel - count) + ":");
-
-                        if (ciclesCounter > 0) --ciclesCounter;
-                        if (count++ == ciclesCounter) count = 0;
                     }
-                    else if (code[i][j] == "if")
+                    else if (code[i] == "if")
                     {
- 
+                        ++conditionCounter;
+
+                        if (code[i + 2] == "and")
+                        {
+                            wrFile.WriteLine("MOV opReg1, " + code[i + 1]);
+                            wrFile.WriteLine("MOV opReg2, " + code[i + 3]);
+                            wrFile.WriteLine("AND opReg1, opReg2");
+                            wrFile.WriteLine("JZ K" + ConditionLabel);
+
+                            ++ConditionLabel;
+                            i += 5;
+                        }
+                        else if (code[i + 2] == "or")
+                        {
+                            wrFile.WriteLine("MOV opReg1, " + code[i + 1]);
+                            wrFile.WriteLine("MOV opReg2, " + code[i + 3]);
+                            wrFile.WriteLine("OR opReg1, opReg2");
+                            wrFile.WriteLine("JZ K" + ConditionLabel);
+                            
+                            ++ConditionLabel;
+                            i += 5;
+                        }
+                        else if (code[i + 2] == "implies")
+                        {
+                            wrFile.WriteLine("MOV tempReg, " + code[i + 1]);
+                            wrFile.WriteLine("OR tempReg, " + code[i + 3]);
+                            wrFile.WriteLine("JZ K" + ConditionLabel);
+
+                            ++ConditionLabel;
+                            i += 5;
+                        }
+
+                        ciclesAndCondition.Push(2);
                     }
                 }
-            }
 
             wrFile.Close();
         }
